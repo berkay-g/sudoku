@@ -1,1 +1,1 @@
-[precompiled sdl](https://github.com/berkay-g/sudoku/tree/precompiled)
+[sdl precompiled](https://github.com/berkay-g/sudoku/tree/precompiled)
