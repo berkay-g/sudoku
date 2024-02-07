@@ -350,12 +350,12 @@ int main()
     }
 
     bool vsync = true;
-    renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_SOFTWARE | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer)
     {
         SDL_Log("Failed to create SDL renderer: %s\n", SDL_GetError());
 
-        renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_SOFTWARE | SDL_RENDERER_PRESENTVSYNC);
         if (!renderer)
         {
             SDL_Log("Failed to create SDL renderer: %s\n", SDL_GetError());
