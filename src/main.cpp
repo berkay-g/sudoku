@@ -17,32 +17,17 @@ void draw(App* app)
     app->sudokuDrawGridLines();
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     app->sudokuDrawActive();
-    const Uint32 colors[3][4] = {{0, 0, 255, 100}, {255, 255, 0, 100}, {255, 0, 0, 100}};
+    const Uint32 colors[3][4] = { {0, 0, 255, 100}, {255, 255, 0, 100}, {255, 0, 0, 100} };
     app->sudokuDrawShadows(colors);
 
     app->sudokuDrawNumbers();
 
     app->sudokuDrawImguiWindow();
-    
+
 
     app->ImguiRender();
     // Update the screen
     SDL_RenderPresent(renderer);
-}
-
-// Define a separate function to serve as the event filter
-int EventFilter(void* userdata, SDL_Event* event, App& app) {
-    if (event->type == SDL_EVENT_WINDOW_RESIZED)
-    {
-        // Handle window resize event here
-        app.SetWindowWidthHeight(event->window.data1, event->window.data2);
-
-        draw(&app);
-
-        // SDL_Log("Window resized: %dx%d\n", event->window.data1, event->window.data2);
-    }
-    
-    return 1;
 }
 
 int main()
@@ -50,13 +35,24 @@ int main()
     App app("Sudoku", 800, 575);
     app.SetWindowMinimumSize(400, 305);
 
-    // Set up an SDL event filter using the separate function and capture the app by reference
-    SDL_SetEventFilter([](void* userdata, SDL_Event* event) -> int {
-        return EventFilter(userdata, event, *static_cast<App*>(userdata));
+    SDL_AddEventWatch([](void* userdata, SDL_Event* event) -> int {
+
+        if (event->type == SDL_EVENT_WINDOW_RESIZED)
+        {
+            // Handle window resize event here
+            App* pThis = reinterpret_cast<App*>(userdata);
+
+            pThis->SetWindowWidthHeight(event->window.data1, event->window.data2);
+
+            draw(pThis);
+
+            //SDL_Log("Window resized: %dx%d\n", event->window.data1, event->window.data2);
+        }
+
+        return 1;
     }, &app);
 
     ImGuiIO& io = app.ImguiInit();
-
     app.sudokuStartGame();
 
     FPSmanager fps;
