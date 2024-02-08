@@ -55,6 +55,7 @@ public:
     bool click = false;
     SDL_FRect rects[9 * 9]{};
     float rect_size = 60.f;
+    int difficulty_level = 1;
     Sudoku sudoku;
     void sudokuStartGame();
     void sudokuDrawGrid();
@@ -226,6 +227,7 @@ bool App::IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect& rect)
 // Sudoku
 void App::sudokuStartGame()
 {
+    sudoku.setDifficulty(difficulty_level);
     sudoku.generateSudoku();
     sudoku.initializeCellNumbers();
     sudoku.initializeStates();
@@ -283,12 +285,12 @@ void App::sudokuDrawShadows(const Uint32 colors[3][4])
 {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, colors[0][0], colors[0][1], colors[0][2], colors[0][3]);
-    auto colored = getAllColored(sudoku.active);
+    auto colored = sudoku.getAllColored();
     for (auto& i : colored)
         SDL_RenderFillRect(renderer, &rects[get1DIndex(i.first, i.second, 9)]);
 
     SDL_SetRenderDrawColor(renderer, colors[1][0], colors[1][1], colors[1][2], colors[1][3]);
-    std::vector<int> allOcc = findAll(sudoku.active, sudoku.cell_numbers);
+    std::vector<int> allOcc = sudoku.findAll();
     for (int i = 0; i < allOcc.size(); i++)
     {
         if (allOcc[i] == sudoku.active)
@@ -326,7 +328,7 @@ void App::sudokuProcessKeyboardInput(const SDL_Keycode keycode)
             if (sudoku.states[sudoku.active] != State::Start)
             {
                 sudoku.cell_numbers[sudoku.active] = i;
-                updateGrid(sudoku.cell_numbers, sudoku.grid);
+                sudoku.updateGrid();
             }
         }
     }
@@ -337,7 +339,7 @@ void App::sudokuProcessKeyboardInput(const SDL_Keycode keycode)
         if (sudoku.states[sudoku.active] != State::Start)
         {
             sudoku.cell_numbers[sudoku.active] = 0;
-            updateGrid(sudoku.cell_numbers, sudoku.grid);
+            sudoku.updateGrid();
         }
     }
     // SDLK_KP_1 = 1073741913
@@ -348,7 +350,7 @@ void App::sudokuProcessKeyboardInput(const SDL_Keycode keycode)
             if (sudoku.states[sudoku.active] != State::Start)
             {
                 sudoku.cell_numbers[sudoku.active] = i + 1;
-                updateGrid(sudoku.cell_numbers, sudoku.grid);
+                sudoku.updateGrid();
             }
         }
     }
@@ -414,20 +416,26 @@ void App::sudokuProcessMouseButtonDownInput()
 
 void App::sudokuDrawImguiWindow()
 {
+    static bool unsaved_document = false;
     static bool cheat = false;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize;
+    if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
     ImGui::SetNextWindowPos({ 650, 100 }, ImGuiCond_FirstUseEver);
-    ImGui::Begin("sudoku", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("sudoku", NULL, window_flags);
     sudoku_window_pos = ImGui::GetWindowPos();
     sudoku_window_size = ImGui::GetWindowSize();
     if (ImGui::Button("reset"))
+    {
+        unsaved_document = false;
         sudokuStartGame();
+    }
 
     ImGui::SameLine();
     if (ImGui::Button("*##cheat"))
     {
         cheat = true;
         sudoku.solved = sudoku.start;
-        solveSudoku(sudoku.solved);
+        sudoku.solveSudoku(sudoku.solved);
     }
     if (ImGui::BeginItemTooltip())
     {
@@ -439,7 +447,7 @@ void App::sudokuDrawImguiWindow()
 
     if (ImGui::Button("check"))
     {
-        valid = isValidSudoku(sudoku.grid);
+        valid = sudoku.isValidSudoku(sudoku.grid);
         valid ? check_color = { 0.f, 1.f, 0.f, 1.f } : check_color = { 1.f, 0.f, 0.f, 1.f };
     }
     ImGui::SameLine();
@@ -451,6 +459,31 @@ void App::sudokuDrawImguiWindow()
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+
+    const char* items[] = { "Easy", "Medium", "Hard", "Evil" };
+    static int item_current_idx = 1;
+    const char* combo_preview_value = items[item_current_idx];
+    if (ImGui::BeginCombo("##difficulty", combo_preview_value, ImGuiComboFlags_WidthFitPreview))
+    {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            const bool is_selected = (item_current_idx == n);
+            if (ImGui::Selectable(items[n], is_selected))
+            {
+                item_current_idx = n;
+                if (difficulty_level != item_current_idx)
+                {
+                    difficulty_level = item_current_idx;
+                    unsaved_document = true;
+                }
+            }
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+
     ImGui::Checkbox("Click", &click);
     if (click)
     {
@@ -497,7 +530,7 @@ void App::sudokuDrawImguiWindow()
         if (ImGui::Button("fill"))
         {
             sudoku.grid = sudoku.solved;
-            initializeCellNumbers(sudoku.grid, sudoku.cell_numbers);
+            sudoku.initializeCellNumbers();
         }
 
 
