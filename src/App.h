@@ -203,7 +203,7 @@ void App::ShowMouseCursor() {
 void App::DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x) {
     if (number == 0)
         return;
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
 
     ImGui::SetNextWindowPos(position);
     ImGui::Begin(std::string("Number " + std::to_string(x)).c_str(), nullptr, window_flags);
@@ -418,7 +418,7 @@ void App::sudokuDrawImguiWindow()
 {
     static bool unsaved_document = false;
     static bool cheat = false;
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
     if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
     ImGui::SetNextWindowPos({ 650, 100 }, ImGuiCond_FirstUseEver);
     ImGui::Begin("sudoku", NULL, window_flags);
@@ -508,7 +508,7 @@ void App::sudokuDrawImguiWindow()
     if (cheat)
     {
         ImGui::SetNextWindowPos({ sudoku_window_pos.x - sudoku_window_size.y / 4, sudoku_window_pos.y + sudoku_window_size.y + 10 }, ImGuiCond_Appearing);
-        ImGui::Begin("Cheat", &cheat, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Begin("Cheat", &cheat, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking);
         for (int i = 0; i < 9; i++)
         {
             for (int j = 0; j < 9; j++)
