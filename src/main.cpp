@@ -1,5 +1,4 @@
 #include "App.h"
-#include "util.h"
 
 #include "SDL2_framerate.h"
 
