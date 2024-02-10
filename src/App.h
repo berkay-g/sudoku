@@ -35,6 +35,7 @@ public:
     void HideMouseCursor();
     void ShowMouseCursor();
 
+    void DrawString(const std::string& str, const ImVec2 &position, float size, const ImVec4 &color, int discriminator);
     void DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x);
     bool IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect& rect);
     
@@ -212,6 +213,23 @@ void App::DrawNumber(int number, const ImVec2& position, float size, const ImVec
     ImGui::GetFont()->Scale *= size / 100;
     ImGui::PushFont(ImGui::GetFont());
     ImGui::Text(std::to_string(number).c_str());
+    ImGui::GetFont()->Scale = old_size;
+    ImGui::PopFont();
+    ImGui::PopStyleColor();
+    ImGui::End();
+}
+
+void App::DrawString(const std::string& str, const ImVec2 &position, float size, const ImVec4 &color, int discriminator)
+{
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+
+    ImGui::SetNextWindowPos(position);
+    ImGui::Begin(std::string("String " + std::to_string(discriminator)).c_str(), nullptr, window_flags);
+    ImGui::PushStyleColor(ImGuiCol_Text, color);
+    float old_size = ImGui::GetFont()->Scale;
+    ImGui::GetFont()->Scale *= size / 100;
+    ImGui::PushFont(ImGui::GetFont());
+    ImGui::Text(str.c_str());
     ImGui::GetFont()->Scale = old_size;
     ImGui::PopFont();
     ImGui::PopStyleColor();
