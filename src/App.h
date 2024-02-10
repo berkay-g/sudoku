@@ -36,7 +36,6 @@ public:
     void ShowMouseCursor();
 
     void DrawString(const std::string& str, const ImVec2 &position, float size, const ImVec4 &color, int discriminator);
-    void DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x);
     bool IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect& rect);
     
 private:
@@ -50,6 +49,7 @@ private:
 
 public:
     // Sudoku
+    void DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x);
     ImVec2 sudoku_window_pos, sudoku_window_size;
     ImVec4 check_color;
     bool valid = false;
@@ -201,24 +201,6 @@ void App::ShowMouseCursor() {
     }
 }
 
-void App::DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x) {
-    if (number == 0)
-        return;
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
-
-    ImGui::SetNextWindowPos(position);
-    ImGui::Begin(std::string("Number " + std::to_string(x)).c_str(), nullptr, window_flags);
-    ImGui::PushStyleColor(ImGuiCol_Text, color);
-    float old_size = ImGui::GetFont()->Scale;
-    ImGui::GetFont()->Scale *= size / 100;
-    ImGui::PushFont(ImGui::GetFont());
-    ImGui::Text(std::to_string(number).c_str());
-    ImGui::GetFont()->Scale = old_size;
-    ImGui::PopFont();
-    ImGui::PopStyleColor();
-    ImGui::End();
-}
-
 void App::DrawString(const std::string& str, const ImVec2 &position, float size, const ImVec4 &color, int discriminator)
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
@@ -243,6 +225,24 @@ bool App::IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect& rect)
 }
 
 // Sudoku
+void App::DrawNumber(int number, const ImVec2& position, float size, const ImVec4& color, int x) {
+    if (number == 0)
+        return;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+
+    ImGui::SetNextWindowPos(position);
+    ImGui::Begin(std::string("Number " + std::to_string(x)).c_str(), nullptr, window_flags);
+    ImGui::PushStyleColor(ImGuiCol_Text, color);
+    float old_size = ImGui::GetFont()->Scale;
+    ImGui::GetFont()->Scale *= size / 100;
+    ImGui::PushFont(ImGui::GetFont());
+    ImGui::Text(std::to_string(number).c_str());
+    ImGui::GetFont()->Scale = old_size;
+    ImGui::PopFont();
+    ImGui::PopStyleColor();
+    ImGui::End();
+}
+
 void App::sudokuStartGame()
 {
     sudoku.setDifficulty(difficulty_level);
